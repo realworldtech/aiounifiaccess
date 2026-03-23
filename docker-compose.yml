@@ -1,0 +1,20 @@
+services:
+  claude:
+    build: .
+    stdin_open: true  # -i
+    tty: true         # -t
+    volumes:
+      # Mount the project directory
+      - .:/workspace
+      # Writable base layer for credentials, session data, etc.
+      - claude-state:/home/claude/.claude
+      # Mount host .claude config read-only on top
+      - ~/.claude/plugins:/home/claude/.claude/plugins:ro
+      - ~/.claude/settings.json:/home/claude/.claude/settings.json:ro
+      - ~/.claude/CLAUDE.md:/home/claude/.claude/CLAUDE.md:ro
+      - ~/.claude/skills:/home/claude/.claude/skills:ro
+      - ~/.claude/agents:/home/claude/.claude/agents:ro
+    working_dir: /workspace
+
+volumes:
+  claude-state:

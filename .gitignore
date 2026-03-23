@@ -1,0 +1,22 @@
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+dist/
+build/
+.venv/
+.mypy_cache/
+.pytest_cache/
+.env
+*.egg
+.eggs/
+htmlcov/
+.coverage
+.tox/
+
+# Claude Code
+.claude/
+
+# Internal docs
+docs/
+api_reference.pdf
