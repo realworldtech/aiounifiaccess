@@ -64,9 +64,7 @@ class TestDoorParsing:
         assert door.door_position_status is None
 
     def test_door_position_none_string(self):
-        door = Door.model_validate(
-            {"id": "d4", "door_position_status": "none"}
-        )
+        door = Door.model_validate({"id": "d4", "door_position_status": "none"})
         assert door.door_position_status == DoorPositionStatus.NONE
 
     def test_door_minimal(self):

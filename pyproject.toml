@@ -35,6 +35,7 @@ dev = [
     "flake8",
     "isort",
     "mypy",
+    "pre-commit",
 ]
 docs = [
     "sphinx>=7",
