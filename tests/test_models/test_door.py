@@ -19,6 +19,7 @@ class TestDoorEnums:
         assert DoorLockStatus.UNLOCK == "unlock"
 
     def test_position_status(self):
+        assert DoorPositionStatus.NONE == "none"
         assert DoorPositionStatus.OPEN == "open"
         assert DoorPositionStatus.CLOSE == "close"
 
@@ -61,6 +62,12 @@ class TestDoorParsing:
             }
         )
         assert door.door_position_status is None
+
+    def test_door_position_none_string(self):
+        door = Door.model_validate(
+            {"id": "d4", "door_position_status": "none"}
+        )
+        assert door.door_position_status == DoorPositionStatus.NONE
 
     def test_door_minimal(self):
         door = Door.model_validate({"id": "d3"})

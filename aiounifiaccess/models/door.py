@@ -13,6 +13,7 @@ class DoorLockStatus(str, Enum):
 
 
 class DoorPositionStatus(str, Enum):
+    NONE = "none"
     OPEN = "open"
     CLOSE = "close"
 
