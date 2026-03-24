@@ -2,6 +2,7 @@
 
 from aiounifiaccess.events.models import (
     BaseEvent,
+    BaseInfoEvent,
     DoorbellCompletedEvent,
     DoorbellIncomingEvent,
     DoorbellRENEvent,
@@ -27,6 +28,7 @@ from aiounifiaccess.events.signature import verify_webhook_signature
 
 __all__ = [
     "BaseEvent",
+    "BaseInfoEvent",
     "DoorbellCompletedEvent",
     "DoorbellIncomingEvent",
     "DoorbellRENEvent",

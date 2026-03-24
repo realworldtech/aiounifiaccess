@@ -1,6 +1,6 @@
 """Async Python client for the UniFi Access API."""
 
-__version__ = "0.1.0"
+__version__ = "0.1.1"
 API_REFERENCE_VERSION = "4.0.10"
 
 from aiounifiaccess.client import UniFiAccessClient
@@ -32,6 +32,7 @@ from aiounifiaccess.errors import (
 )
 from aiounifiaccess.events import (
     BaseEvent,
+    BaseInfoEvent,
     DoorbellCompletedEvent,
     DoorbellIncomingEvent,
     DoorbellRENEvent,
@@ -113,6 +114,7 @@ __all__ = [
     "WebhookEndpoint",
     # Events
     "BaseEvent",
+    "BaseInfoEvent",
     "DoorbellCompletedEvent",
     "DoorbellIncomingEvent",
     "DoorbellRENEvent",

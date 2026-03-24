@@ -81,6 +81,20 @@ class RemoteUnlockEvent(BaseEvent):
     data: RemoteUnlockData = RemoteUnlockData()
 
 
+# --- Connection / status events ---
+
+
+class BaseInfoData(BaseAPIModel):
+    top_log_count: int = 0
+
+
+class BaseInfoEvent(BaseEvent):
+    """access.base.info - connection handshake / status."""
+
+    event: str = "access.base.info"
+    data: BaseInfoData = BaseInfoData()
+
+
 # --- Webhook events (structured location/device/actor/object data) ---
 
 
@@ -217,6 +231,7 @@ class RawEvent(BaseEvent):
 # --- Event routing ---
 
 _EVENT_MAP: dict[str, type[BaseEvent]] = {
+    "access.base.info": BaseInfoEvent,
     "access.remote_view": RemoteViewEvent,
     "access.remote_view.change": RemoteViewChangeEvent,
     "access.data.device.remote_unlock": RemoteUnlockEvent,

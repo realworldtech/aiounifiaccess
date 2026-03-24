@@ -59,6 +59,14 @@ class WebSocketListener:
                         if msg.type == aiohttp.WSMsgType.TEXT:
                             try:
                                 data = msg.json()
+                                if not isinstance(data, dict):
+                                    if data != "Hello":
+                                        logger.warning(
+                                            "Unexpected non-dict WebSocket"
+                                            " message: %r",
+                                            data,
+                                        )
+                                    continue
                                 yield parse_event(data)
                             except Exception:
                                 logger.error(

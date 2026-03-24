@@ -1,6 +1,7 @@
 """Tests for event model parsing."""
 
 from aiounifiaccess.events.models import (
+    BaseInfoEvent,
     DoorbellCompletedEvent,
     DoorbellIncomingEvent,
     DoorbellRENEvent,
@@ -14,6 +15,28 @@ from aiounifiaccess.events.models import (
     VisitorStatusChangedEvent,
     parse_event,
 )
+
+
+class TestBaseInfoEvent:
+    def test_parse(self):
+        raw = {
+            "event": "access.base.info",
+            "receiver_id": "",
+            "event_object_id": "a120562b-4370-41f3-9adb-8ca069473bcf",
+            "save_to_history": False,
+            "data": {"top_log_count": 0},
+        }
+        event = parse_event(raw)
+        assert isinstance(event, BaseInfoEvent)
+        assert event.event == "access.base.info"
+        assert event.data.top_log_count == 0
+
+    def test_nonzero_log_count(self):
+        event = parse_event(
+            {"event": "access.base.info", "data": {"top_log_count": 42}}
+        )
+        assert isinstance(event, BaseInfoEvent)
+        assert event.data.top_log_count == 42
 
 
 class TestRemoteViewEvent:

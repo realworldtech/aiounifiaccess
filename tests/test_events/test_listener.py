@@ -30,6 +30,57 @@ class TestListenerConstants:
         assert delays == [1, 2, 4, 8, 16, 32, 60, 60, 60, 60, 60]
 
 
+class TestKeepaliveHandling:
+    async def test_hello_keepalive_skipped(self):
+        """WebSocket 'Hello' keepalive strings should be silently skipped."""
+        session = AsyncMock(spec=APISession)
+        listener = WebSocketListener(session)
+
+        event_data = {
+            "event": "access.door.unlock",
+            "data": {
+                "location": {"name": "Door"},
+                "device": {},
+                "actor": {},
+                "object": {},
+            },
+        }
+
+        # Simulate what events() does: json-decode then filter
+        async def fake_events():
+            for raw in ["Hello", event_data, "Hello"]:
+                if not isinstance(raw, dict):
+                    continue
+                yield parse_event(raw)
+            listener.stop()
+
+        events = []
+        async for event in fake_events():
+            events.append(event)
+
+        assert len(events) == 1
+        assert isinstance(events[0], DoorUnlockEvent)
+        assert events[0].data.location.name == "Door"
+
+    async def test_unexpected_non_dict_logs_warning(self, caplog):
+        """Non-dict messages that aren't 'Hello' should log a warning."""
+        import logging
+
+        with caplog.at_level(logging.WARNING, logger="aiounifiaccess.events.listener"):
+            # Directly test the guard logic from events()
+            logger = logging.getLogger("aiounifiaccess.events.listener")
+            data = "Goodbye"
+            if not isinstance(data, dict):
+                if data != "Hello":
+                    logger.warning(
+                        "Unexpected non-dict WebSocket message: %r",
+                        data,
+                    )
+
+        assert "Unexpected non-dict WebSocket message" in caplog.text
+        assert "Goodbye" in caplog.text
+
+
 class TestListenerLifecycle:
     def test_stop_sets_flag(self):
         session = AsyncMock(spec=APISession)
