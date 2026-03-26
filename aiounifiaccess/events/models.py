@@ -225,7 +225,7 @@ class VisitorStatusChangedEvent(BaseWebhookEvent):
 class RawEvent(BaseEvent):
     """Fallback for unrecognised event types. Preserves raw JSON."""
 
-    data: dict[str, Any] = {}
+    data: dict[str, Any] | None = None
 
 
 # --- Event routing ---

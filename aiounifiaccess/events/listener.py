@@ -70,7 +70,8 @@ class WebSocketListener:
                                 yield parse_event(data)
                             except Exception:
                                 logger.error(
-                                    "Failed to parse WebSocket message",
+                                    "Failed to parse WebSocket message: %r",
+                                    data,
                                     exc_info=True,
                                 )
                         elif msg.type == aiohttp.WSMsgType.ERROR:

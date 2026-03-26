@@ -258,6 +258,22 @@ class TestRawEvent:
         assert event.event == "access.future.new_event"
         assert event.data["some"] == "payload"
 
+    def test_null_data(self):
+        raw = {
+            "event": "access.something.unknown",
+            "event_object_id": "y",
+            "data": None,
+        }
+        event = parse_event(raw)
+        assert isinstance(event, RawEvent)
+        assert event.data is None
+
+    def test_missing_data_field(self):
+        raw = {"event": "access.something.unknown", "event_object_id": "z"}
+        event = parse_event(raw)
+        assert isinstance(event, RawEvent)
+        assert event.data is None
+
     def test_missing_event_field(self):
         event = parse_event({"data": {"key": "val"}})
         assert isinstance(event, RawEvent)
