@@ -31,6 +31,7 @@ dev = [
     "pytest-asyncio>=0.24",
     "pytest-aiohttp>=1.0",
     "aresponses>=3",
+    "pytest-cov>=6",
     "black",
     "flake8",
     "isort",
@@ -46,6 +47,20 @@ docs = [
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 testpaths = ["tests"]
+addopts = "--cov=aiounifiaccess --cov-report=term-missing"
+
+[tool.coverage.run]
+source = ["aiounifiaccess"]
+branch = true
+
+[tool.coverage.report]
+show_missing = true
+skip_empty = true
+exclude_lines = [
+    "pragma: no cover",
+    "if TYPE_CHECKING:",
+    "if __name__ == .__main__.",
+]
 
 [tool.black]
 line-length = 88
