@@ -24,6 +24,7 @@ from aiounifiaccess.events.models import (
     VisitorStatusChangedEvent,
     parse_event,
 )
+from aiounifiaccess.events.receiver import WebhookReceiver
 from aiounifiaccess.events.signature import verify_webhook_signature
 
 __all__ = [
@@ -48,6 +49,7 @@ __all__ = [
     "UnlockScheduleActivateEvent",
     "UnlockScheduleDeactivateEvent",
     "VisitorStatusChangedEvent",
+    "WebhookReceiver",
     "parse_event",
     "verify_webhook_signature",
 ]

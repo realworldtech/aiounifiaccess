@@ -59,6 +59,7 @@ class WebSocketListener:
                         if msg.type == aiohttp.WSMsgType.TEXT:
                             try:
                                 data = msg.json()
+                                logger.debug("WebSocket message: %r", data)
                                 if not isinstance(data, dict):
                                     if data != "Hello":
                                         logger.warning(

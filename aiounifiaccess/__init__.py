@@ -1,6 +1,6 @@
 """Async Python client for the UniFi Access API."""
 
-__version__ = "0.1.2"
+__version__ = "0.2.0"
 API_REFERENCE_VERSION = "4.0.10"
 
 from aiounifiaccess.client import UniFiAccessClient
@@ -48,6 +48,7 @@ from aiounifiaccess.events import (
     UnlockScheduleActivateEvent,
     UnlockScheduleDeactivateEvent,
     VisitorStatusChangedEvent,
+    WebhookReceiver,
     verify_webhook_signature,
 )
 from aiounifiaccess.models import (
@@ -77,6 +78,7 @@ from aiounifiaccess.models import (
     Visitor,
     VisitorStatus,
     WebhookEndpoint,
+    WebhookEventType,
 )
 
 __all__ = [
@@ -112,6 +114,7 @@ __all__ = [
     "Visitor",
     "VisitorStatus",
     "WebhookEndpoint",
+    "WebhookEventType",
     # Events
     "BaseEvent",
     "BaseInfoEvent",
@@ -130,6 +133,7 @@ __all__ = [
     "UnlockScheduleActivateEvent",
     "UnlockScheduleDeactivateEvent",
     "VisitorStatusChangedEvent",
+    "WebhookReceiver",
     "verify_webhook_signature",
     # Errors
     "APIError",

@@ -48,7 +48,7 @@ from aiounifiaccess.models.user import (
     UserStatus,
 )
 from aiounifiaccess.models.visitor import Visitor, VisitorStatus
-from aiounifiaccess.models.webhook import WebhookEndpoint
+from aiounifiaccess.models.webhook import WebhookEndpoint, WebhookEventType
 
 __all__ = [
     "AccessMethodSettings",
@@ -90,4 +90,5 @@ __all__ = [
     "Visitor",
     "VisitorStatus",
     "WebhookEndpoint",
+    "WebhookEventType",
 ]
