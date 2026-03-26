@@ -14,7 +14,10 @@ def verify_webhook_signature(
 ) -> bool:
     """Verify a webhook signature from UniFi Access.
 
-    The Signature header format is: t=<unix_timestamp>,v1=<hmac_sha256_hex>
+    The Signature header format is: ``t=<unix_timestamp>,v1=<hmac_sha256_hex>``
+
+    The HMAC is computed over ``<timestamp>.<body>`` using the webhook
+    secret as key (SHA-256).
 
     Args:
         secret: The webhook secret from endpoint registration.
@@ -29,7 +32,8 @@ def verify_webhook_signature(
     try:
         parts = dict(part.split("=", 1) for part in signature_header.split(","))
         received_mac = parts.get("v1", "")
-        timestamp = int(parts.get("t", "0"))
+        timestamp_str = parts.get("t", "0")
+        timestamp = int(timestamp_str)
     except (ValueError, AttributeError):
         return False
 
@@ -37,5 +41,7 @@ def verify_webhook_signature(
         if abs(time.time() - timestamp) > max_age_seconds:
             return False
 
-    expected_mac = hmac.new(secret.encode(), body, hashlib.sha256).hexdigest()
+    # Sign timestamp + "." + body (standard webhook pattern)
+    signed_payload = timestamp_str.encode() + b"." + body
+    expected_mac = hmac.new(secret.encode(), signed_payload, hashlib.sha256).hexdigest()
     return hmac.compare_digest(expected_mac, received_mac)

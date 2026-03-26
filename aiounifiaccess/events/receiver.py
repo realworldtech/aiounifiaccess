@@ -78,7 +78,12 @@ class WebhookReceiver:
             body,
             max_age_seconds=self._max_age_seconds,
         ):
-            logger.warning("Webhook signature verification failed")
+            logger.warning(
+                "Webhook signature verification failed: header=%r secret=%s...%s",
+                sig_header,
+                self._secret[:4] if len(self._secret) > 8 else "****",
+                self._secret[-4:] if len(self._secret) > 8 else "****",
+            )
             return web.Response(status=401, text="Invalid signature")
 
         # Parse JSON

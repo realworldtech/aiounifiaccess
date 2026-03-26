@@ -12,7 +12,8 @@ class TestVerifyWebhookSignature:
         self, secret: str, body: bytes, timestamp: int | None = None
     ) -> str:
         ts = timestamp or int(time.time())
-        mac = hmac.new(secret.encode(), body, hashlib.sha256).hexdigest()
+        signed_payload = str(ts).encode() + b"." + body
+        mac = hmac.new(secret.encode(), signed_payload, hashlib.sha256).hexdigest()
         return f"t={ts},v1={mac}"
 
     def test_valid_signature(self):
