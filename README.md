@@ -48,10 +48,34 @@ UniFi Access delivers events through two channels:
 
 | Channel | Delivery | Event types |
 |---------|----------|-------------|
-| **WebSocket** | Persistent connection | Doorbell rings, remote unlocks, connection status |
+| **WebSocket** | Persistent connection | Doorbell rings, remote unlocks, device/location state updates |
 | **Webhook** | Controller POSTs to your endpoint | Door unlocks (NFC/PIN/fingerprint), DPS status, schedules, visitors |
 
 Notably, credential-based door unlock events (`access.door.unlock`) are **webhook-only** — they are not delivered over the WebSocket. To receive all event types, you need both channels.
+
+The WebSocket also delivers **undocumented status events** not listed in the official API reference. These are typed and parsed by the library:
+
+| Event | Model | Description |
+|-------|-------|-------------|
+| `access.data.device.update` | `DeviceUpdateEvent` | Full device state with DPS, lock relays, power, wiring |
+| `access.data.v2.device.update` | `DeviceUpdateV2Event` | Lightweight device change notification with changed-field metadata |
+| `access.data.v2.location.update` | `LocationUpdateV2Event` | Building/floor/door location state changes (most frequent) |
+| `access.data.location.update` | `LocationUpdateEvent` | Full location state |
+| `access.data.setting.update` | `SettingUpdateEvent` | Controller settings changes |
+
+The `DeviceUpdateEvent` is particularly useful — its `configs` list contains key/value pairs for DPS states, lock relay states, and power readings. For example, detecting "door left open":
+
+```python
+from aiounifiaccess import DeviceUpdateEvent
+
+@client.on(DeviceUpdateEvent)
+async def handle_device_update(event: DeviceUpdateEvent):
+    for cfg in event.data.configs:
+        if cfg.tag == "hub_action" and cfg.key.endswith("_dps"):
+            port = cfg.key.replace("input_", "").replace("_dps", "")
+            state = "open" if cfg.value == "on" else "closed"
+            print(f"Port {port} DPS: {state}")
+```
 
 ### WebSocket Only
 

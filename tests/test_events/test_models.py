@@ -2,6 +2,8 @@
 
 from aiounifiaccess.events.models import (
     BaseInfoEvent,
+    DeviceUpdateEvent,
+    DeviceUpdateV2Event,
     DoorbellCompletedEvent,
     DoorbellIncomingEvent,
     DoorbellRENEvent,
@@ -244,6 +246,147 @@ class TestOtherWebhookEvents:
             }
         )
         assert isinstance(event, VisitorStatusChangedEvent)
+
+
+class TestDeviceUpdateEvent:
+    SAMPLE = {
+        "event": "access.data.device.update",
+        "receiver_id": "",
+        "event_object_id": "58d61f48f95a",
+        "save_to_history": False,
+        "data": {
+            "unique_id": "58d61f48f95a",
+            "name": "EAH-8-F95A",
+            "alias": "EAH U12 2 Eden Park Comms Room",
+            "device_type": "UAH-Ent",
+            "ip": "10.66.70.216",
+            "mac": "58:d6:1f:48:f9:5a",
+            "firmware": "v5.9.20.0",
+            "version": "v2.5.149",
+            "is_online": True,
+            "is_connected": True,
+            "is_adopted": True,
+            "location": {
+                "unique_id": "60742bd8-4014-4975-9e9e-2d7c3c68f5a2",
+                "name": "U3-2-Eden-Park-Drv",
+                "location_type": "building",
+                "full_name": "U3-2-Eden-Park-Drv",
+            },
+            "configs": [
+                {
+                    "device_id": "58d61f48f95a",
+                    "key": "input_d1_dps",
+                    "value": "on",
+                    "tag": "hub_action",
+                    "update_time": "2026-03-25T16:32:09+11:00",
+                    "create_time": "2026-03-20T04:05:00+11:00",
+                },
+                {
+                    "device_id": "58d61f48f95a",
+                    "key": "output_d8_lock_relay",
+                    "value": "on",
+                    "tag": "hub_action",
+                    "update_time": "2026-03-27T08:07:09+11:00",
+                    "create_time": "2026-03-20T04:05:00+11:00",
+                },
+            ],
+            "capabilities": ["pin_code", "dps_alarm", "is_hub"],
+            "model": "EAH 8",
+        },
+    }
+
+    def test_parse(self):
+        event = parse_event(self.SAMPLE)
+        assert isinstance(event, DeviceUpdateEvent)
+        assert event.event == "access.data.device.update"
+        assert event.data.name == "EAH-8-F95A"
+        assert event.data.alias == "EAH U12 2 Eden Park Comms Room"
+        assert event.data.device_type == "UAH-Ent"
+        assert event.data.is_online is True
+
+    def test_location(self):
+        event = parse_event(self.SAMPLE)
+        assert isinstance(event, DeviceUpdateEvent)
+        assert event.data.location.name == "U3-2-Eden-Park-Drv"
+        assert event.data.location.location_type == "building"
+
+    def test_configs(self):
+        event = parse_event(self.SAMPLE)
+        assert isinstance(event, DeviceUpdateEvent)
+        assert len(event.data.configs) == 2
+        dps = event.data.configs[0]
+        assert dps.key == "input_d1_dps"
+        assert dps.value == "on"
+        assert dps.tag == "hub_action"
+
+    def test_dps_configs_extraction(self):
+        """Extract DPS states from configs — the door-left-open use case."""
+        event = parse_event(self.SAMPLE)
+        assert isinstance(event, DeviceUpdateEvent)
+        dps_states = {
+            cfg.key: cfg.value
+            for cfg in event.data.configs
+            if cfg.tag == "hub_action" and cfg.key.endswith("_dps")
+        }
+        assert dps_states == {"input_d1_dps": "on"}
+
+    def test_lock_relay_extraction(self):
+        event = parse_event(self.SAMPLE)
+        assert isinstance(event, DeviceUpdateEvent)
+        relays = {
+            cfg.key: cfg.value
+            for cfg in event.data.configs
+            if cfg.tag == "hub_action" and "lock_relay" in cfg.key
+        }
+        assert relays == {"output_d8_lock_relay": "on"}
+
+    def test_capabilities(self):
+        event = parse_event(self.SAMPLE)
+        assert isinstance(event, DeviceUpdateEvent)
+        assert "is_hub" in event.data.capabilities
+
+
+class TestDeviceUpdateV2Event:
+    SAMPLE = {
+        "event": "access.data.v2.device.update",
+        "receiver_id": "",
+        "event_object_id": "3d03f1ac-7d79-4a70-8cae-c3fc738cb9ad",
+        "save_to_history": False,
+        "data": {
+            "name": "EAH-8-F95A",
+            "alias": "EAH U12 2 Eden Park Comms Room",
+            "id": "58d61f48f95a",
+            "ip": "10.66.70.216",
+            "mac": "58:d6:1f:48:f9:5a",
+            "online": True,
+            "adopting": False,
+            "device_type": "UAH-Ent",
+            "firmware": "v5.9.20.0",
+            "version": "v2.5.149",
+            "category": ["hub"],
+        },
+        "meta": {
+            "object_type": "device",
+            "target_field": ["access_method", "settings"],
+            "all_field": False,
+            "id": "58d61f48f95a",
+            "source": "",
+        },
+    }
+
+    def test_parse(self):
+        event = parse_event(self.SAMPLE)
+        assert isinstance(event, DeviceUpdateV2Event)
+        assert event.data.name == "EAH-8-F95A"
+        assert event.data.online is True
+        assert event.data.category == ["hub"]
+
+    def test_meta(self):
+        event = parse_event(self.SAMPLE)
+        assert isinstance(event, DeviceUpdateV2Event)
+        assert event.meta.object_type == "device"
+        assert event.meta.id == "58d61f48f95a"
+        assert "access_method" in event.meta.target_field
 
 
 class TestRawEvent:
