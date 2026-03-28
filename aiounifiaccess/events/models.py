@@ -114,6 +114,7 @@ class EventDevice(BaseAPIModel):
     ip: str = ""
     mac: str = ""
     online: bool = False
+    adopting: bool = False
     device_type: str = ""
     connected_hub_id: str = ""
     location_id: str = ""
@@ -124,6 +125,7 @@ class EventDevice(BaseAPIModel):
     hw_type: str = ""
     revision: str = ""
     cap: Any = None
+    category: list[str] | None = None
 
 
 class EventActor(BaseAPIModel):
@@ -133,6 +135,7 @@ class EventActor(BaseAPIModel):
 
 
 class EventObject(BaseAPIModel):
+    event_type: str = ""
     authentication_type: str = ""
     authentication_value: str = ""
     policy_id: str = ""
@@ -144,10 +147,10 @@ class EventObject(BaseAPIModel):
 
 
 class WebhookEventData(BaseAPIModel):
-    location: EventLocation = EventLocation()
-    device: EventDevice = EventDevice()
-    actor: EventActor = EventActor()
-    object: EventObject = EventObject()
+    location: EventLocation | None = EventLocation()
+    device: EventDevice | None = EventDevice()
+    actor: EventActor | None = None
+    object: EventObject | None = None
 
 
 class BaseWebhookEvent(BaseEvent):
@@ -276,18 +279,19 @@ class DeviceUpdateData(BaseAPIModel):
     mac: str = ""
     hw_type: str = ""
     start_time: int = 0
-    last_seen: int = 0
+    last_seen: int | None = None
     is_online: bool = False
     is_connected: bool = False
     is_adopted: bool = False
     is_managed: bool = False
     is_rebooting: bool = False
     is_unavailable: bool = False
-    location: DeviceLocation = DeviceLocation()
+    is_camera: bool = False
+    location: DeviceLocation | None = None
     configs: list[DeviceConfig] = []
     capabilities: list[str] = []
     model: str = ""
-    revision: str = ""
+    revision: str | None = None
 
 
 class DeviceUpdateEvent(BaseEvent):

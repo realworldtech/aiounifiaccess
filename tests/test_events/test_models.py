@@ -172,6 +172,52 @@ class TestDoorPositionEvent:
         assert isinstance(event, DoorPositionEvent)
         assert event.data.object.status == "open"
 
+    def test_null_actor_and_event_type_in_object(self):
+        """Real payload from UniFi controller — actor is null for DPS events."""
+        raw = {
+            "event": "access.device.dps_status",
+            "event_object_id": "00a1d6f6",
+            "data": {
+                "location": {
+                    "id": "5d97c3e3",
+                    "location_type": "door",
+                    "name": "Front Door",
+                    "up_id": "578f37b4",
+                    "extras": {},
+                    "device_ids": None,
+                },
+                "device": {
+                    "name": "EAH-8-F95A",
+                    "id": "58d61f48f95a",
+                    "device_type": "UAH-Ent",
+                },
+                "actor": None,
+                "object": {"event_type": "dps_change", "status": "open"},
+            },
+        }
+        event = parse_event(raw)
+        assert isinstance(event, DoorPositionEvent)
+        assert event.data.actor is None
+        assert event.data.object.status == "open"
+        assert event.data.location.name == "Front Door"
+
+    def test_null_actor_and_null_object(self):
+        """Some events have both actor and object as null."""
+        raw = {
+            "event": "access.device.dps_status",
+            "event_object_id": "x",
+            "data": {
+                "location": {"name": "Door"},
+                "device": {"id": "dev1"},
+                "actor": None,
+                "object": None,
+            },
+        }
+        event = parse_event(raw)
+        assert isinstance(event, DoorPositionEvent)
+        assert event.data.actor is None
+        assert event.data.object is None
+
 
 class TestDoorbellEvents:
     def test_incoming(self):
