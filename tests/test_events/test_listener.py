@@ -1,7 +1,9 @@
 """Tests for WebSocket listener."""
 
 import asyncio
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
+
+import aiohttp
 
 from aiounifiaccess.events.handler import EventHandler
 from aiounifiaccess.events.listener import (
@@ -79,6 +81,42 @@ class TestKeepaliveHandling:
 
         assert "Unexpected non-dict WebSocket message" in caplog.text
         assert "Goodbye" in caplog.text
+
+
+class TestWebSocketHeartbeat:
+    async def test_ws_connect_passes_heartbeat(self):
+        """ws_connect must request a heartbeat so silent TCP disconnects
+        (NAT timeout, controller restart without FIN) tear down the socket
+        and trigger reconnect, instead of hanging on ``async for msg in ws``
+        forever.
+        """
+        session = MagicMock(spec=APISession)
+        session._api_token = "token"
+        session.ws_url = "wss://example/api/v1/developer/devices/notifications"
+        session._build_ssl_context = MagicMock(return_value=False)
+
+        captured: dict = {}
+
+        def fake_ws_connect(*args, **kwargs):
+            captured["args"] = args
+            captured["kwargs"] = kwargs
+            listener.stop()
+            raise aiohttp.ClientError("stop after capturing kwargs")
+
+        http_session = MagicMock()
+        http_session.ws_connect = fake_ws_connect
+        session._ensure_session = MagicMock(return_value=http_session)
+
+        listener = WebSocketListener(session)
+
+        async for _ in listener.events():
+            pass  # pragma: no cover - generator never yields
+
+        assert "kwargs" in captured, "ws_connect was never called"
+        assert (
+            "heartbeat" in captured["kwargs"]
+        ), "ws_connect must pass heartbeat= so aiohttp detects dead connections"
+        assert captured["kwargs"]["heartbeat"] > 0
 
 
 class TestListenerLifecycle:

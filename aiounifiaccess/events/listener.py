@@ -22,6 +22,12 @@ _INITIAL_DELAY = 1.0
 _MAX_DELAY = 60.0
 _MULTIPLIER = 2.0
 
+# WebSocket heartbeat: aiohttp sends a ping every N seconds and tears the
+# socket down if no pong arrives in time. Without this, a silently dropped
+# TCP connection (NAT idle timeout, controller restart without FIN) leaves
+# ``async for msg in ws`` blocked forever and the reconnect loop never runs.
+_WS_HEARTBEAT = 30.0
+
 
 class WebSocketListener:
     """WebSocket connection manager for real-time event notifications."""
@@ -51,6 +57,7 @@ class WebSocketListener:
                     self._session.ws_url,
                     headers=headers,
                     ssl=ssl_ctx,
+                    heartbeat=_WS_HEARTBEAT,
                 ) as ws:
                     logger.info("WebSocket connected to %s", self._session.ws_url)
                     delay = _INITIAL_DELAY  # Reset on successful connect

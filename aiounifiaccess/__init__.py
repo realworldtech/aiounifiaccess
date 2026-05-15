@@ -1,6 +1,6 @@
 """Async Python client for the UniFi Access API."""
 
-__version__ = "0.2.2"
+__version__ = "0.2.3"
 API_REFERENCE_VERSION = "4.0.10"
 
 from aiounifiaccess.client import UniFiAccessClient
